@@ -3,6 +3,7 @@ package org.aplas.colorgamex;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -11,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.concurrent.TimeUnit;
 
 public class MyActivity extends AppCompatActivity {
     TextView timer;
@@ -27,6 +29,8 @@ public class MyActivity extends AppCompatActivity {
     ViewGroup progressbox;
     ProgressBar progress;
     Switch isMinus;
+    CountDownTimer countDown;
+    final String FORMAT = "%d:%d";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,7 @@ public class MyActivity extends AppCompatActivity {
         progressbox =(ViewGroup)findViewById(R.id.progressBox);
         progress =(ProgressBar)findViewById(R.id.progressScore);
         isMinus =(Switch)findViewById(R.id.isMinus);
+        initTimer();
 
     }
 
@@ -69,5 +74,14 @@ public class MyActivity extends AppCompatActivity {
     public void startGame(View v) {
     }
     public void submitColor(View v) {
+    }
+    private void initTimer(){
+        countDown = new CountDownTimer(getResources().getInteger(R.integer.maxtimer)*1000,1) {
+            public void onTick(long millisUntilFinished) {
+                timer.setText(""+String.format(FORMAT, TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds( TimeUnit.MILLISECONDS.toMinutes( millisUntilFinished)), TimeUnit.MILLISECONDS.toMillis(millisUntilFinished) - TimeUnit.SECONDS.toMillis( TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished))));
+            }
+            public void onFinish() {
+            }
+        };
     }
 }
