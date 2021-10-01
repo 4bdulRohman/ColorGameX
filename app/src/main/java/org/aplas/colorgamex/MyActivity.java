@@ -89,13 +89,25 @@ public class MyActivity extends AppCompatActivity {
         }
     }
     public void submitColor(View v) {
+        if (isStarted) {
+            String charCode = ((Button) v).getText().toString();
+            if (charCode.equals(charList.get(clrText.getText().toString()))) {
+                correctSubmit();
+            } else {
+                wrongSubmit();
+            }
+        }
     }
     private void initTimer(){
-        countDown = new CountDownTimer(getResources().getInteger(R.integer.maxtimer)*1000,1) {
+        countDown = new CountDownTimer(getResources().getInteger(R.integer.maxtimer) * 1000, 1) {
+            @Override
             public void onTick(long millisUntilFinished) {
                 timer.setText("" + String.format(FORMAT, TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)), TimeUnit.MILLISECONDS.toMillis(millisUntilFinished) - TimeUnit.SECONDS.toMillis(TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished))));
             }
+
+            @Override
             public void onFinish() {
+                wrongSubmit();
             }
         };
     }
@@ -103,15 +115,8 @@ public class MyActivity extends AppCompatActivity {
         clrList = getResources().getStringArray(R.array.colorList);
         String[] temp = getResources().getStringArray(R.array.charList);
         for (int i = 0; i < clrList.length; i++) {
-            System.out.println(clrList[i]);
             charList.put(clrList[i], temp[i]);
-            System.out.println(temp[i]);
         }
-        String clrTxt = ((TextView)findViewById(R.id.clrText)).getText().toString();
-        int lastNum = Arrays.asList(clrList).indexOf(clrTxt);
-        int colorIdx = getNewRandomInt(0,5,lastNum);
-        clrText.setText(clrList[colorIdx]);
-        countDown.start();
     }
     int getNewRandomInt(int min, int max, int except) {
         Random r = new Random();
@@ -119,10 +124,39 @@ public class MyActivity extends AppCompatActivity {
         int number;
         do {
             number = r.ints(min, (max + 1)).findFirst().getAsInt();
-            if (number!=except) found=true;
+            if (number != except) found = true;
         } while (!found);
         return number;
     }
+
+    private void updateScore(int score) {
+        progress.setProgress(score);
+        scoreText.setText(Integer.toString(score));
+    }
+
+    private void correctSubmit() {
+        int newScore = progress.getProgress() + getResources().getInteger(R.integer.counter);
+        updateScore(newScore);
+        if (progress.getProgress() == getResources().getInteger(R.integer.maxScore)) {
+            countDown.cancel();
+            timer.setText("COMPLETE");
+            isStarted = false;
+            start.setVisibility(View.VISIBLE);
+        } else {
+            newGameStage();
+        }
+    }
     private void newGameStage() {
+        String clrTxt = ((TextView) findViewById(R.id.clrText)).getText().toString();
+        int lastNum = Arrays.asList(clrList).indexOf(clrTxt);
+        int colorIdx = getNewRandomInt(0, 5, lastNum);
+        clrText.setText(clrList[colorIdx]);
+        countDown.start();
+    }
+    private void wrongSubmit() {
+        if (isMinus.isChecked() && progress.getProgress() > 0) {
+            updateScore(progress.getProgress() - getResources().getInteger(R.integer.counter));
+        }
+        newGameStage();
     }
 }
